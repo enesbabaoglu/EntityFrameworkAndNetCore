@@ -12,6 +12,8 @@ namespace EntityFrameworkAndNetCore
 
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Order> Orders { get; set; }
+
 
         public static readonly ILoggerFactory MyLoggerFactory
         = LoggerFactory.Create(builder => { builder.AddConsole(); });
@@ -35,7 +37,10 @@ namespace EntityFrameworkAndNetCore
 
         [Required]
         public double Price { get; set; }
+
+        public int CategoryId { get; set; } 
     }
+
     public class Category
     {
         public int Id { get; set; }
@@ -45,6 +50,36 @@ namespace EntityFrameworkAndNetCore
         public string Name { get; set; }
     }
 
+    public class Order
+    {
+        public int Id { get; set; }
+        public string ProductId { get; set; }
+
+        public DateTime createDate { get; set; }
+    }
+    public class User
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string UserName { get; set; }
+
+       [Required]
+        public string Email { get; set; }
+    }  
+    
+    public class Adress    
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string FullName { get; set; }
+        public string Title { get; set; }
+        public string Body { get; set; }
+    }
+    
     class Program
     {
         static void Main(string[] args)
@@ -111,7 +146,7 @@ namespace EntityFrameworkAndNetCore
         }
         static void GetProductByName (string name){
 
-             using(var context = new ShopContext()){
+            using(var context = new ShopContext()){
 
                 var products = context
                                 .Products
