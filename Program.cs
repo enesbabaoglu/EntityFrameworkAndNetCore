@@ -60,7 +60,7 @@ namespace EntityFrameworkAndNetCore
 
         [Required]
         public string Email { get; set; }
-        public List<Address> Addresses { get; set; }
+        public List<Address> Addresses { get; set; } // For One to many relation -many side 
     }
 
     public class Address
@@ -73,8 +73,8 @@ namespace EntityFrameworkAndNetCore
         public string Title { get; set; }
         public string Body { get; set; }
 
-        public User User { get; set; } //navigation property
-        public int? UserId { get; set; }
+        public User User { get; set; } //navigation property - One to many relation - One side
+        public int? UserId { get; set; } 
     }
 
     class Program
