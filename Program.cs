@@ -26,6 +26,22 @@ namespace EntityFrameworkAndNetCore
              .UseSqlServer("Data Source=DESKTOP-AJT2GI5; Initial Catalog=ShopDb;Integrated Security=SSPI;");
         //  .UseSqlite("Data Source=shop.db");
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProductCategory>()  // Product Category tablosunda İki adet primary key olduğunu belirtiyoruz
+                        .HasKey(t=> new {t.ProductId,t.CategoryId});
+            
+            modelBuilder.Entity<ProductCategory>()
+                        .HasOne(pc=>pc.Product)
+                        .WithMany(p=>p.ProductCategories)
+                        .HasForeignKey(pc=>pc.ProductId);
+                                                         //İki Id ninde (ProductId,CategoryId) çoklu olabileceğini ve foreign key olduğunu belirtiyoruz
+            modelBuilder.Entity<ProductCategory>()
+                        .HasOne(pc=>pc.Category)
+                        .WithMany(c=>c.ProductCategories)
+                        .HasForeignKey(pc=>pc.CategoryId);
+        }
+
     }
 
     public class Product
@@ -41,6 +57,8 @@ namespace EntityFrameworkAndNetCore
         public double Price { get; set; }
 
         public int CategoryId { get; set; }
+        
+        public List<ProductCategory> ProductCategories { get; set; }
     }
 
     public class Category
@@ -50,9 +68,19 @@ namespace EntityFrameworkAndNetCore
         [Required]
         [MaxLength(100)]
         public string Name { get; set; }
+        public List<ProductCategory> ProductCategories { get; set; }
     }
+
+    public class ProductCategory {
+        public int ProductId { get; set; }
+        public Product Product { get; set; }
+        public int CategoryId { get; set; } 
+        public Category Category { get; set; } 
+    }
+
     public class User
     {
+        //[Key] Eğer Id kolonunu farklı isimde örneğin "KullanıcıId " tanımlamak istersek başına bundan eklenemek gerekir.
         public int Id { get; set; }
 
         [Required]
@@ -69,7 +97,7 @@ namespace EntityFrameworkAndNetCore
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required] //vb. data annotations denir.  
         [MaxLength(100)]
         public string FullName { get; set; }
         public string Title { get; set; }
@@ -97,7 +125,7 @@ namespace EntityFrameworkAndNetCore
         static void Main(string[] args)
         {
 
-            InsertUserAndCustomer();
+            InsertProductCategory();
 
         }
 
@@ -227,10 +255,10 @@ namespace EntityFrameworkAndNetCore
         }
 
 
-        /// <summary>
-        /// /////////////RELATION ONE-MANY 
-        /// </summary>
-        
+    /// <summary>
+    /// /////////////RELATION ONE-MANY 
+    /// </summary>
+    
         
         static void InsertAddresses()
         {
@@ -267,7 +295,7 @@ namespace EntityFrameworkAndNetCore
 
         }
 
-     /// <summary>
+    /// <summary>
     /// /////////////RELATION ONE-ONE 
     /// </summary>
         
@@ -312,5 +340,33 @@ namespace EntityFrameworkAndNetCore
 
 
         }
+
+    /// <summary>
+    /// /////////////RELATION MANY_TO_MANY
+    /// </summary>
+        static void InsertProductCategory(){ //Product category tablosuna insert yapma 
+
+            using(var db=new ShopContext()){
+
+                var categories = new List<Category>(){
+                    new Category {Name = "Telefon"},
+                    new Category {Name = "Bilgisayar"},
+                    new Category {Name = "Elektronik"},
+                } ;
+
+                db.AddRange (categories);
+                var Ids = new int[2]{1,2};
+
+                var p = db.Products.Find(1);
+
+                p.ProductCategories = Ids.Select(cid => new ProductCategory(){
+                    CategoryId = cid,
+                    ProductId =p.Id
+                }).ToList();
+
+                db.SaveChanges();
+            } 
+        }
+    
     }
 }
